@@ -35,10 +35,11 @@ async function run(){
             console.log(result);
         })
 
-        //get all users
-        app.get('/users' , async (req, res)=>{
-            const query = {}
-            const result = await userCollections.find(query).toArray()
+        //get users based on accountMode
+        app.get('/users/role/:email' , async (req, res)=>{
+            const email = req.params.email
+            const query = {email : email}
+            const result = await userCollections.findOne(query)
             res.send(result)
         })
 
