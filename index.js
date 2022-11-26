@@ -37,6 +37,14 @@ async function run(){
 
         })
 
+        //getting all cars by category
+        app.get('/categories/:id', async (req, res) =>{
+
+            // const id = req.params.id
+            const query = {categoryId : "637f95669789df96bf37080d"}
+            const result = await carsCollections.find(query).toArray()
+            res.send(result)
+        })
 
         // add new user to to database
         app.post('/users' , async(req, res) =>{
