@@ -3,6 +3,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 const cors = require('cors')
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 //middleware
 
@@ -40,24 +41,47 @@ async function run(){
         //getting all cars by category
         app.get('/categories/:id', async (req, res) =>{
 
-            // const id = req.params.id
-            const query = {categoryId : "637f95669789df96bf37080d"}
+            const id = req.params.id
+            const query = {categoryId : id}
             const result = await carsCollections.find(query).toArray()
             res.send(result)
         })
 
-        // add new user to to database
-        app.post('/users' , async(req, res) =>{
+          // jwt issuing function
 
+          app.get('/jwt' , async (req, res) => {
+            
+            const email = req.query.email
+            const query = {email : email}
+            const user = await userCollections.findOne(query)
+            if(user){
+                const token = jwt.sign({email} , process.env.ACCESS_TOKEN , {expiresIn : '1d'})
+                return res.send({accessToken : token})
+            }
+          
+            res.status(403).send({accessToken : 'not found'})
+
+        })
+
+        // add new user to to database
+        app.put('/users/:email' , async(req, res) =>{
+            const email = req.params.email
             const user = req.body
-            const result = await userCollections.insertOne(user)
+            const filter = {email: email}
+            const options = {upsert : true}
+            const updatedDoc = {
+                $set : user
+            }
+            // const result = await userCollections.insertOne(user)
+            const result = await userCollections.updateOne(filter , updatedDoc , options)
             res.send(result)
-            console.log(result);
+            // console.log(result);
         })
 
         //get users based on accountMode
         app.get('/users/role/:email' , async (req, res)=>{
             const email = req.params.email
+            console.log(email);
             const query = {email : email}
             const result = await userCollections.findOne(query)
             res.send(result)
