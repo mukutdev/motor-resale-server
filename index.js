@@ -10,6 +10,29 @@ require('dotenv').config()
 app.use(cors())
 app.use(express.json())
 
+//verify jwt function
+
+function verifyJwt(req, res, next) {
+
+    const authHeader = req.headers.authorization
+
+    if(!authHeader){
+        res.status(401).send('unauthorized access') 
+    }
+
+    const token = authHeader.split(' ')[1]
+
+    jwt.verify(token , process.env.ACCESS_TOKEN , (err , decoded)=>{
+        if(err){
+            res.status(403).send({message : 'forbidden access'})
+        }
+
+        req.decoded = decoded
+        next()
+    })
+}
+
+
 //mongodb
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.h5qu391.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -20,6 +43,7 @@ async function run(){
         const carsCollections = client.db('CarsDatabase').collection('allCars');
         const userCollections = client.db('CarsDatabase').collection('allUsers')
         const categoryCollections = client.db('CarsDatabase').collection('categories')
+        const bookingCollections = client.db('CarsDatabase').collection('booking')
 
         app.get('/allCars' , async (req, res) =>{
             const query = {}
@@ -85,6 +109,16 @@ async function run(){
             const query = {email : email}
             const result = await userCollections.findOne(query)
             res.send(result)
+        })
+
+        //booking api
+
+        app.post('/bookings' , async (req, res)=>{
+
+            const booking = req.body
+            const result = await bookingCollections.insertOne(booking)
+            res.send(result)
+
         })
 
     }
