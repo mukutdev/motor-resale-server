@@ -18,6 +18,7 @@ async function run(){
     try{
         const carsCollections = client.db('CarsDatabase').collection('allCars');
         const userCollections = client.db('CarsDatabase').collection('allUsers')
+        const categoryCollections = client.db('CarsDatabase').collection('categories')
 
         app.get('/allCars' , async (req, res) =>{
             const query = {}
@@ -26,6 +27,17 @@ async function run(){
 
         })
         
+       
+        //getting all categories name
+        app.get('/categories' , async (req, res) =>{
+
+            const query = {}
+            const result = await categoryCollections.find(query).toArray()
+            res.send(result)
+
+        })
+
+
         // add new user to to database
         app.post('/users' , async(req, res) =>{
 
