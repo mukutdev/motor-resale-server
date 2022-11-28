@@ -48,12 +48,6 @@ async function run() {
       .collection("categories");
     const bookingCollections = client.db("CarsDatabase").collection("booking");
 
-    // app.get('/allCars' , async (req, res) =>{
-    //     const query = {}
-    //     const result = await carsCollections.find(query).toArray()
-    //     res.send(result)
-
-    // })
 
     //getting all categories name
     app.get("/categories", async (req, res) => {
@@ -174,11 +168,20 @@ async function run() {
     })
 
     //getting all sellers
-
     app.get('/sellers', verifyJwt, async (req, res)=>{
 
         const query = {accountMode : 'seller'}
         const result = await userCollections.find(query).toArray()
+        res.send(result)
+
+    })
+
+    //seller delete api
+    app.delete('/sellers/:id',  async (req, res)=>{
+
+        const id = req.params.id;
+        const query = {_id : ObjectId(id)}
+        const result = await userCollections.deleteOne(query)
         res.send(result)
 
     })
@@ -189,6 +192,17 @@ async function run() {
         const query = {accountMode : 'buyer'}
         const result = await userCollections.find(query).toArray()
         res.send(result)
+    })
+
+    //buyer delete api
+    app.delete('/buyers/:id', verifyJwt, async (req, res)=>{
+
+        const id = req.params.id;
+        console.log(id);
+        const query = {_id : ObjectId(id)}
+        const result = await userCollections.deleteOne(query)
+        res.send(result)
+
     })
 
     //seller verification
