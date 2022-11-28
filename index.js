@@ -188,15 +188,13 @@ async function run() {
     //getting all buyers
 
     app.get('/buyers', verifyJwt, async (req, res)=>{
-
         const query = {accountMode : 'buyer'}
         const result = await userCollections.find(query).toArray()
         res.send(result)
     })
 
     //buyer delete api
-    app.delete('/buyers/:id', verifyJwt, async (req, res)=>{
-
+    app.delete('/buyers/:id', async (req, res)=>{
         const id = req.params.id;
         console.log(id);
         const query = {_id : ObjectId(id)}
