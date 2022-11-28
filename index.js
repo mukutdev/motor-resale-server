@@ -175,12 +175,37 @@ async function run() {
 
     //getting all sellers
 
-    app.get('/sellers' , async (req, res)=>{
+    app.get('/sellers', verifyJwt, async (req, res)=>{
 
         const query = {accountMode : 'seller'}
         const result = await userCollections.find(query).toArray()
         res.send(result)
 
+    })
+    //getting all buyers
+
+    app.get('/buyers', verifyJwt, async (req, res)=>{
+
+        const query = {accountMode : 'buyer'}
+        const result = await userCollections.find(query).toArray()
+        res.send(result)
+    })
+
+    //seller verification
+
+    app.put('/sellers/verified/:id' , verifyJwt , async (req, res)=>{
+        
+        const id = req.params.id;
+        const filter = {_id : ObjectId(id)}
+        const option = {upsert : true}
+        const updatedDoc = {
+            $set :{
+                verified : true
+            }
+        }
+
+        const result = await userCollections.updateOne(filter , updatedDoc , option)
+        res.send(result)
 
     })
 
