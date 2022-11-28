@@ -139,6 +139,13 @@ async function run() {
       res.send(products);
     });
 
+    app.delete("/allCars/:id", verifyJwt, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const products = await carsCollections.deleteOne(query)
+      res.send(products);
+    });
+
     app.put("/allCars/advertise/:id", verifyJwt, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
