@@ -147,7 +147,6 @@ async function run() {
 
     app.put("/allCars/advertise/:id", verifyJwt, async (req, res) => {
       const id = req.params.id;
-      console.log(id);
       const filter = { _id: ObjectId(id) };
 
       const options = { upsert: true };
@@ -165,11 +164,23 @@ async function run() {
       res.send(result);
     });
 
+    //getting all advertised items
     app.get('/allCars/advertise' , async (req, res) => {
 
         const query = {advertised : true}
         const result = await carsCollections.find(query).toArray()
         res.send(result)
+
+    })
+
+    //getting all sellers
+
+    app.get('/sellers' , async (req, res)=>{
+
+        const query = {accountMode : 'seller'}
+        const result = await userCollections.find(query).toArray()
+        res.send(result)
+
 
     })
 
