@@ -45,12 +45,12 @@ async function run(){
         const categoryCollections = client.db('CarsDatabase').collection('categories')
         const bookingCollections = client.db('CarsDatabase').collection('booking')
 
-        app.get('/allCars' , async (req, res) =>{
-            const query = {}
-            const result = await carsCollections.find(query).toArray()
-            res.send(result)
+        // app.get('/allCars' , async (req, res) =>{
+        //     const query = {}
+        //     const result = await carsCollections.find(query).toArray()
+        //     res.send(result)
 
-        })
+        // })
         
        
         //getting all categories name
@@ -134,6 +134,15 @@ async function run(){
             const car = req.body
             const result = await carsCollections.insertOne(car)
             res.send(result)
+
+        })
+
+        app.get('/allCars' , verifyJwt, async (req, res)=>{
+
+            const email = req.query.email
+            const query = {email : email}
+            const products = await carsCollections.find(query).toArray()
+            res.send(products)
 
         })
 
