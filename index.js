@@ -96,16 +96,13 @@ async function run(){
             const updatedDoc = {
                 $set : user
             }
-            // const result = await userCollections.insertOne(user)
             const result = await userCollections.updateOne(filter , updatedDoc , options)
             res.send(result)
-            // console.log(result);
         })
 
         //get users based on accountMode
         app.get('/users/role/:email' , async (req, res)=>{
             const email = req.params.email
-            console.log(email);
             const query = {email : email}
             const result = await userCollections.findOne(query)
             res.send(result)
@@ -117,6 +114,25 @@ async function run(){
 
             const booking = req.body
             const result = await bookingCollections.insertOne(booking)
+            res.send(result)
+
+        })
+        // get user based bookings
+
+        app.get('/bookings' , verifyJwt, async (req, res)=>{
+            const email = req.query.email 
+            console.log(email);
+            const query = {cusEmail : email}
+            const booking = await bookingCollections.find(query).toArray()
+            res.send(booking)
+        })
+
+        //add new car to collection
+
+        app.post('/allCars', verifyJwt, async (req, res)=>{
+
+            const car = req.body
+            const result = await carsCollections.insertOne(car)
             res.send(result)
 
         })
