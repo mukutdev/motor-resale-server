@@ -114,7 +114,7 @@ async function run() {
     });
     // get user based bookings
 
-    app.get("/bookings", verifyJwt, async (req, res) => {
+    app.get("/bookings", async (req, res) => {
       const email = req.query.email;
       console.log(email);
       const query = { cusEmail: email };
@@ -124,7 +124,7 @@ async function run() {
 
     //add new car to collection
 
-    app.post("/allCars", verifyJwt, async (req, res) => {
+    app.post("/allCars", async (req, res) => {
       const car = req.body;
       const result = await carsCollections.insertOne(car);
       res.send(result);
@@ -132,7 +132,7 @@ async function run() {
 
     //getting all added car based on seller
 
-    app.get("/allCars", verifyJwt, async (req, res) => {
+    app.get("/allCars",  async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
       const products = await carsCollections.find(query).toArray();
@@ -146,7 +146,7 @@ async function run() {
       res.send(products);
     });
 
-    app.put("/allCars/advertise/:id", verifyJwt, async (req, res) => {
+    app.put("/allCars/advertise/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
 
@@ -175,7 +175,7 @@ async function run() {
     })
 
     //getting all sellers
-    app.get('/sellers', verifyJwt, async (req, res)=>{
+    app.get('/sellers', async (req, res)=>{
 
         const query = {accountMode : 'seller'}
         const result = await userCollections.find(query).toArray()
@@ -194,7 +194,7 @@ async function run() {
     })
     //getting all buyers
 
-    app.get('/buyers', verifyJwt, async (req, res)=>{
+    app.get('/buyers',  async (req, res)=>{
         const query = {accountMode : 'buyer'}
         const result = await userCollections.find(query).toArray()
         res.send(result)
@@ -212,7 +212,7 @@ async function run() {
 
     //seller verification
 
-    app.put('/sellers/verified/:id' , verifyJwt , async (req, res)=>{
+    app.put('/sellers/verified/:id' ,  async (req, res)=>{
         
         const id = req.params.id;
         const filter = {_id : ObjectId(id)}
