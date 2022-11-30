@@ -235,7 +235,7 @@ async function run() {
 run().catch(err => console.log(err));
 
 app.get("/", (req, res) => {
-  res.send("server is up and running");
+  res.send("server is up and running smoothly , nice");
 });
 
 app.listen(port, () => {
