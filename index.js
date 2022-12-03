@@ -4,6 +4,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const stripe = require("stripe")(process.env.STRIPE_SK);
 require("dotenv").config();
 //middleware
 
@@ -12,24 +13,24 @@ app.use(express.json());
 
 //verify jwt function
 
-function verifyJwt(req, res, next) {
-  const authHeader = req.headers.authorization;
+// function verifyJwt(req, res, next) {
+//   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    res.status(401).send("unauthorized access");
-  }
+//   if (!authHeader) {
+//     res.status(401).send("unauthorized access");
+//   }
 
-  const token = authHeader.split(" ")[1];
+//   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
-    if (err) {
-      res.status(403).send({ message: "forbidden access" });
-    }
+//   jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+//     if (err) {
+//       res.status(403).send({ message: "forbidden access" });
+//     }
 
-    req.decoded = decoded;
-    next();
-  });
-}
+//     req.decoded = decoded;
+//     next();
+//   });
+// }
 
 //mongodb
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.h5qu391.mongodb.net/?retryWrites=true&w=majority`;
@@ -41,12 +42,15 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+
+    console.log('db connected');
     const carsCollections = client.db("CarsDatabase").collection("allCars");
     const userCollections = client.db("CarsDatabase").collection("allUsers");
     const categoryCollections = client
       .db("CarsDatabase")
       .collection("categories");
     const bookingCollections = client.db("CarsDatabase").collection("booking");
+    const paymentCollections = client.db("CarsDatabase").collection("payment")
 
 
     //getting all categories name
@@ -122,9 +126,20 @@ async function run() {
       res.send(booking);
     });
 
+    //getting single booking info for payment
+
+    app.get('/bookings/:id' ,  async (req, res)=>{
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id : ObjectId(id)}
+      const booking = await bookingCollections.findOne(query)
+      res.send(booking)
+    })
+
     //add new car to collection
 
     app.post("/allCars", async (req, res) => {
+      
       const car = req.body;
       const result = await carsCollections.insertOne(car);
       res.send(result);
@@ -227,6 +242,48 @@ async function run() {
         res.send(result)
 
     })
+
+
+    //stripe payment api 
+
+    app.post('/create-payment-intent' , async(req , res)=>{
+      const booking = req.body
+      const price = booking.salePrice
+      const amount = price * 100
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        currency: "usd",
+        amount : amount,
+        "payment_method_types": [
+          "card"
+        ],
+      })
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      })
+
+    })
+
+    //add payment info to db
+
+    app.post('/payments' , async(req , res)=>{
+      const payment = req.body
+      const result = await paymentCollections.insertOne(payment)
+      const id = payment.bookingId
+      const filter = {_id : ObjectId(id)}
+      const updatedDoc = {
+        $set :{
+            paid : true,
+            trxId : payment.trxId
+        }
+      }
+
+      const updatedResult = await bookingCollections.updateOne(filter , updatedDoc)
+      res.send(result)
+
+    })
+
 
 
   } finally {
