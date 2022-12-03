@@ -51,6 +51,7 @@ async function run() {
       .collection("categories");
     const bookingCollections = client.db("CarsDatabase").collection("booking");
     const paymentCollections = client.db("CarsDatabase").collection("payment")
+    const reportedCollections = client.db("CarsDatabase").collection("reported")
 
 
     //getting all categories name
@@ -282,6 +283,21 @@ async function run() {
       const updatedResult = await bookingCollections.updateOne(filter , updatedDoc)
       res.send(result)
 
+    })
+
+    // report to admin api
+
+    app.post('/reported' , async (req , res)=>{
+
+      const reported = req.body
+      const result = await reportedCollections.insertOne(reported)
+      res.send(result)
+    })
+
+    app.get('/reported' , async(req,res)=>{
+      const query = {}
+      const reportedItem = await reportedCollections.find(query).toArray()
+      res.send(reportedItem)
     })
 
 
